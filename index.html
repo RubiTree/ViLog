@@ -12,36 +12,67 @@
             font: 14px/1.5 "Lucida Grande", "Helvetica Neue", Helvetica, Arial, 'PingFang SC', "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", "WenQuanYi Microhei", "Heiti SC", "STHeiti", "Noto Sans CJK SC", "Source Han Sans CN", sans-serif;
         }
 
+
+        /* 竖屏（todo 混合固定值和比例） */
         #app {
-            display: flex;
-            flex-direction: row;
+            display: grid;
             height: 100%;
             width: 100%;
+            grid-template-columns: 20% 80%; 
+            grid-template-rows: 50% 50%;
+        }
+
+        #filtered-log-container {
+            background-color: rgb(211, 209, 209);
+        }
+
+        #all-log-container {
+            background-color: gainsboro;
+            grid-column-start: 1;
+            grid-column-end: 3;
         }
 
         #regex-container {
             background-color: rgb(189, 187, 187);
         }
 
-        #filtered-log-container {
-            background-color: rgb(211, 209, 209);
-            flex-grow: 1;
-        }
-
-        #all-log-container {
-            background-color: gainsboro;
-            flex-grow: 1;
-        }
-
-        #new-regex{
-            width:95%;
-            height: 50px;
-        }
-
         .panel_1 {
-            height: 100%;
-            flex-basis: 250px;
             overflow: auto;
+        }
+
+        /* 横屏 */
+        @media screen and (min-aspect-ratio: 1/1) {
+            #app {
+                display: flex;
+                flex-direction: row;
+                height: 100%;
+                width: 100%;
+            }
+
+            #filtered-log-container {
+                background-color: rgb(211, 209, 209);
+                flex-grow: 1;
+            }
+
+            #all-log-container {
+                background-color: gainsboro;
+                flex-grow: 1;
+            }
+
+            #regex-container {
+                background-color: rgb(189, 187, 187);
+            }
+
+            .panel_1 {
+                height: 100%;
+                flex-basis: 250px;
+                overflow: auto;
+            }
+        }
+
+        #new-regex {
+            width: 95%;
+            height: 50px;
         }
 
         ul {
@@ -98,7 +129,8 @@
                     @keyup.enter="addRegex"></textarea>
 
                 <div>
-                    <textarea id="import-regex" cols="6" rows="1" placeholder="在此粘贴" v-model="importRegexGroup"></textarea>
+                    <textarea id="import-regex" cols="6" rows="1" placeholder="在此粘贴"
+                        v-model="importRegexGroup"></textarea>
                     <button @click="importRegex()">←导入Regex组</button>
                 </div>
 
