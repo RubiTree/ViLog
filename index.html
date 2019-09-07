@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style type="text/css">
+        html,
+        body {
+            margin: 0px;
+            height: 100%;
+            width: 100%;
+
+            font: 14px/1.5 "Lucida Grande", "Helvetica Neue", Helvetica, Arial, 'PingFang SC', "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", "WenQuanYi Microhei", "Heiti SC", "STHeiti", "Noto Sans CJK SC", "Source Han Sans CN", sans-serif;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: row;
+            height: 100%;
+            width: 100%;
+        }
+
+        #regex-container {
+            background-color: rgb(189, 187, 187);
+        }
+
+        #filtered-log-container {
+            background-color: rgb(211, 209, 209);
+            flex-grow: 1;
+        }
+
+        #all-log-container {
+            background-color: gainsboro;
+            flex-grow: 1;
+        }
+
+        #new-regex{
+            width:95%;
+            height: 50px;
+        }
+
+        .panel_1 {
+            height: 100%;
+            flex-basis: 250px;
+            overflow: auto;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            border-width: 0.1px;
+            border-color: rgba(223, 244, 250, 0.555);
+            border-style: solid;
+            word-wrap: break-word;
+        }
+
+        .dissmiss_regex {
+            color: rgb(211, 209, 209)
+        }
+
+        li:hover {
+            /* background-color: rgba(209, 232, 252, 0.219); */
+            border-color: rgba(55, 206, 248, 0.952);
+            border-width: 1.5px;
+        }
+
+        .hover_item {
+            background-color: rgba(209, 232, 252, 0.219);
+        }
+
+        .selected_item {
+            background-color: rgba(209, 232, 252, 0.774);
+        }
+
+        .foucus_item {
+            background-color: rgb(241, 204, 79);
+        }
+
+        .manual-panel {
+            background-color: rgba(182, 3, 3, 0.829);
+            padding: 5px;
+        }
+
+        .key_item {
+            background-color: rgb(241, 125, 79) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div id="regex-container" class="panel_1">
+            <div class="manual-panel">
+                <textarea id="new-regex" autocomplete="off" placeholder="输入新的regex，回车" v-model="newRegex"
+                    @keyup.enter="addRegex"></textarea>
+
+                <div>
+                    <textarea id="import-regex" cols="6" rows="1" placeholder="在此粘贴" v-model="importRegexGroup"></textarea>
+                    <button @click="importRegex()">←导入Regex组</button>
+                </div>
+
+                <div>
+                    <button @click="exportRegex()">导出Regex</button>
+                    <button @click="exportFilterResult()">复制筛选结果</button>
+                </div>
+            </div>
+
+            <ul id="regex-list">
+                <li v-for="sortedRegex in sortedRegexList" @click="onSelectRegex(sortedRegex)"
+                    :class="{ dissmiss_regex: sortedRegex.regex.dismiss , hover_item: sortedRegex.hover, foucus_item: sortedRegex.focus}"
+                    @mouseenter="onMouseEnterRegex(sortedRegex)" @mouseleave="onMouseLeaveRegex(sortedRegex)">
+                    <button @click="removeRegex(sortedRegex)">X</button>
+                    <span>{{sortedRegex.regex.regexText}}</span>
+                    <font color="blue">{{ sortedRegex.getFocusProgress() }}</font>
+                    <button @click="switchDismissRegex(sortedRegex)">-</button>
+                </li>
+            </ul>
+        </div>
+        <div id="filtered-log-container" class="panel_1">
+            <ul id="note_list">
+                <li v-for="sortedLine in sortedResultList"
+                    :class="{selected_item: sortedLine.select, key_item: sortedLine.key, hover_item: sortedLine.hover, foucus_item: sortedLine.focus}"
+                    @click="onSelectFilterLine(sortedLine)">
+                    {{sortedLine.content}}
+                </li>
+            </ul>
+        </div>
+        <div id="all-log-container" class="panel_1">
+            <ul id="window_list">
+                <li v-for="contentLine in allContentList"
+                    :class="{ selected_item: contentLine.select, key_item: contentLine.key, foucus_item: contentLine.focus}"
+                    @click="onSelectLog(contentLine)">
+                    {{contentLine.content}}
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="module" src="script/main.js"></script>
+</body>
+
+</html>
