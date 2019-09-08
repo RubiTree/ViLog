@@ -136,11 +136,12 @@
                 <div>
                     <textarea id="import-regex" cols="6" rows="1" placeholder="在此粘贴"
                         v-model="importRegexGroup"></textarea>
-                    <button @click="importRegex()">←导入Regex组</button>
+                    <button @click="importRegex()">←导入Regex</button>
                 </div>
 
                 <div>
                     <button @click="exportRegex()">导出Regex</button>
+                    <button @click="simpleCopyRegex()">简单复制</button>
                     <button @click="exportFilterResult()">复制筛选结果</button>
                 </div>
             </div>

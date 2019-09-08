@@ -169,6 +169,10 @@ var app = new Vue({
             exportContentToClipboard(JSON.stringify(this.regexGroup))
         },
 
+        simpleCopyRegex: function () {
+            exportContentToClipboard(this.regexGroup.regexList.map((regex) => regex.regexText).join("|"))
+        },
+
         exportFilterResult: function () {
             exportContentToClipboard(this.sortedResultList.map((sortedLine) => sortedLine.content).join("<br/>\n"))
         },
