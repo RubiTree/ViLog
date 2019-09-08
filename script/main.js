@@ -419,12 +419,12 @@ let allLogContainer = document.getElementById('all-log-container');
 
 // 获取当前视觉中心index（不是第一个）
 function _getFilterLogContainerCenterItemIndex() {
-    let containerScrollTop = allLogContainer.scrollTop
+    let containerScrollTop = filteredLogContainer.scrollTop
     let targetIndex = 0;
-    let childSize = filteredLogContainer.childNodes.length
+    let childSize = filteredLogContainer.childNodes[0].childNodes.length
 
     for (let i = 0; i < childSize; i++) {
-        let childNode = filteredLogContainer.childNodes[i];
+        let childNode = filteredLogContainer.childNodes[0].childNodes[i];
         if (childNode.offsetTop + childNode.clientHeight >= containerScrollTop) {
             targetIndex = i - 1;
             if (targetIndex < 0) targetIndex = 0;
@@ -442,7 +442,13 @@ function _scrollIndexToCenterInFilterLogContainer(index) {
 
 // 把to滚动到视觉中心
 function _scrollIndexToCenterInLogContainer(index) {
-    allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - 200
+    let windowHeight = window.innerHeight
+    let windowWidth = window.innerWidth
+    if (windowHeight > windowWidth) {
+        allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - 200 - windowHeight / 2
+    } else {
+        allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - 200
+    }
 }
 
 
