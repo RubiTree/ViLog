@@ -218,7 +218,7 @@ var app = new Vue({
                 for (let i = 0; i < sortedRegexList.length; i++) {
                     if (sortedRegexList[i].regex.dismiss) continue
 
-                    if (logLine.content.search(sortedRegexList[i].regex.regexText) > -1) {
+                    if (logLine.content.search(new RegExp(sortedRegexList[i].regex.regexText, 'i')) > -1) {
                         if (!isThisLineAdded) {
                             // 给搜索结果列表加上这行，不能重复加
                             sortedResultList.push(new SortedLine(logLine.content, sortedResultList.length, index))
