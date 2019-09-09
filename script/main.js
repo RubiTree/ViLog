@@ -143,7 +143,7 @@ var app = new Vue({
         },
 
         addRegex: function () {
-            this.newRegex = this.newRegex.trim()
+            this.newRegex = this.newRegex.replace(/\n$/g,'');
             if (isStringEmpty(this.newRegex)) return
 
             this.regexGroup.addRegex(new Regex(this.newRegex))
