@@ -143,6 +143,7 @@ var app = new Vue({
         },
 
         addRegex: function () {
+            this.newRegex = this.newRegex.trim()
             if (isStringEmpty(this.newRegex)) return
 
             this.regexGroup.addRegex(new Regex(this.newRegex))
