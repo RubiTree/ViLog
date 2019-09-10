@@ -175,7 +175,8 @@ var app = new Vue({
         },
 
         exportFilterResult: function () {
-            exportContentToClipboard(this.sortedResultList.map((sortedLine) => sortedLine.content).join("<br/>\n"))
+            // 这里有时候需要加<br>，有时候不需要...
+            exportContentToClipboard(this.sortedResultList.map((sortedLine) => sortedLine.content).join("\n"))
         },
 
         removeRegex: function (sortedRegex) {
