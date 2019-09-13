@@ -617,3 +617,10 @@ function isStringEmpty(obj) {
     }
 }
 
+new Valine({
+    el: '#vcomments',
+    appId: 'fnTU2upQ0TyY3nweOUj5G2Ht-gzGzoHsz',
+    appKey: 'UcOPNcgGvlpqvrGosTlH4jSY',
+    placeholder: '来都来了，不讲两句再走？',
+    visitor: true
+})
