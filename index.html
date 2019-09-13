@@ -2,11 +2,11 @@
 <html>
 
 <head>
-    <title>RubiTree</title>
+    <title>ViLog</title>
     <meta name="author" content="RubiTree" />
-    <link rel="bookmark" type="image/x-icon" href="favicon.ico" />
-    <link rel="shortcut icon" href="favicon.ico" />
-    
+    <link rel="bookmark" type="image/x-icon" href="resource/favicon.ico" />
+    <link rel="shortcut icon" href="resource/favicon.ico" />
+
     <style type="text/css">
         [v-cloak] {
             display: none;
@@ -18,7 +18,8 @@
             height: 100%;
             width: 100%;
 
-            font: 14px/1.5 "Lucida Grande", "Helvetica Neue", Helvetica, Arial, 'PingFang SC', "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", "WenQuanYi Microhei", "Heiti SC", "STHeiti", "Noto Sans CJK SC", "Source Han Sans CN", sans-serif;
+            color: #404040;
+            font: 12px/1.5 "Lucida Grande", "Helvetica Neue", Helvetica, Arial, 'PingFang SC', "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", "WenQuanYi Microhei", "Heiti SC", "STHeiti", "Noto Sans CJK SC", "Source Han Sans CN", sans-serif;
         }
 
         #app {
@@ -72,11 +73,12 @@
         }
 
         #filtered-log-container {
-            background-color: rgb(215, 212, 218);
+            /* background-color: rgb(230, 224, 204); */
+            background-color: rgb(227, 233, 231);
         }
 
         #all-log-container {
-            background-color: rgb(226, 222, 211);
+            background-color: rgb(226, 226, 226);
             grid-column-start: 1;
             grid-column-end: 3;
 
@@ -84,7 +86,7 @@
         }
 
         #regex-container {
-            background-color: rgb(189, 187, 187);
+            background-color: #F5E4D4;
             color: rgb(0, 36, 24);
         }
 
@@ -97,7 +99,7 @@
         }
 
         .normal_log_content {
-            color: rgb(5, 5, 5);
+            color: rgb(39, 39, 39);
         }
 
         .log_header {
@@ -114,19 +116,25 @@
             }
 
             #filtered-log-container {
-                background-color: rgb(218, 214, 212);
+                /* background-color: rgb(230, 224, 204); */
+                background-color: rgb(227, 233, 231);
+
                 flex-grow: 1;
             }
 
             #all-log-container {
-                background-color: rgb(226, 222, 211);
+                /* background-color: rgb(234, 234, 239); */
+                background-color: rgb(226, 226, 226);
+
                 flex-grow: 1;
                 margin: 1px;
             }
 
             #regex-container {
-                background-color: rgb(216, 196, 196);
+                /* background-color: rgb(236, 217, 212); */
+                background-color: #F5E4D4;
                 color: rgb(0, 36, 24);
+
             }
 
             .panel_1 {
@@ -182,24 +190,35 @@
 
         #group-selector {
             color: white;
-            background-color: rgba(155, 2, 2, 0.829);
+            background-color: rgb(108, 33, 54);
             padding: 5px;
             padding-bottom: 10px;
         }
 
         #title {
-            background-color: rgba(155, 2, 2, 0.829);
+            background-color: rgb(108, 33, 54);
             padding-left: 5px;
             padding-top: 5px;
         }
 
         #group-panel {
-            background-color: rgba(204, 70, 70, 0.829);
+            background-color: rgb(158, 42, 75);
             padding: 5px;
         }
 
         .key_item {
             background-color: rgb(241, 125, 79) !important;
+        }
+
+        .circle_button {
+            border-radius: 50%;
+            border: none;
+            width: 14px;
+            height: 14px;
+            align-self: center;
+            background: white;
+            margin: 0px;
+            padding: 0px
         }
     </style>
 </head>
@@ -211,9 +230,10 @@
             <div id="regex-container" class="panel_1">
                 <div class="manual-panel">
                     <div id="title">
-                        <span style="color: gold">ViLog</span>
+                        <span style="color: rgb(241,234,188); font-weight:bold">ViLog</span>
                         <button @click="switchGroupManualShowState()"
-                            style="background-color: transparent; border: transparent; color: white">{{groupManualStateTips}}</button>
+                            style="background-color: transparent; border: transparent; color: white"
+                            v-cloak>{{groupManualStateTips}}</button>
                         <input type="text" style="background: none;border: none; width: 15px"
                             @keyup.enter="enterCommand" v-model="command">
                     </div>
@@ -238,14 +258,16 @@
                                 @keyup.enter="addGroupAndSwitch" v-model="newGroupName">
                         </div>
 
-                        <div>
+                        <div style="margin-top: 5px">
                             <button @click="exportCurrentGroup()">导出当前组</button>
                             <button @click="exportAllGroups()">导出所有组</button>
                         </div>
 
-                        <div>
-                            <button @click="removeCurrentGroup()" style="background-color: tomato">删除当前组</button>
-                            <button @click="removeAllGroups()" style="background-color: tomato">删除所有组</button>
+                        <div style="margin-top: 5px">
+                            <button @click="removeCurrentGroup()"
+                                style="background-color:  rgb(158, 42, 75); border: none">删除当前组</button>
+                            <button @click="removeAllGroups()"
+                                style="background-color:  rgb(158, 42, 75);border:none">删除所有组</button>
                         </div>
 
                     </div>
@@ -265,10 +287,10 @@
                     <li v-for="sortedRegex in sortedRegexList" @click="onSelectRegex(sortedRegex)"
                         :class="{ dissmiss_regex: sortedRegex.regex.dismiss , hover_item: sortedRegex.hover, foucus_item: sortedRegex.focus}"
                         @mouseenter="onMouseEnterRegex(sortedRegex)" @mouseleave="onMouseLeaveRegex(sortedRegex)">
-                        <button @click.stop="removeRegex(sortedRegex)">X</button>
+                        <button @click.stop="removeRegex(sortedRegex)" class="circle_button">X</button>
                         <span>{{sortedRegex.regex.regexText}}</span>
-                        <font color="blue">{{ sortedRegex.getFocusProgress() }}</font>
-                        <button @click.stop="switchDismissRegex(sortedRegex)">-</button>
+                        <font color="#1D6E94">{{ sortedRegex.getFocusProgress() }}</font>
+                        <button @click.stop="switchDismissRegex(sortedRegex)" class="circle_button">-</button>
                     </li>
                 </ul>
             </div>
