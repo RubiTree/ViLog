@@ -250,8 +250,9 @@
                             v-cloak>{{groupManualStateTips}}</button>
                         <input type="text" style="background: none;border: none; width: 15px"
                             @keyup.enter="enterCommand" v-model="command">
-                        <span id="/vilog" class="leancloud-visitors" data-flag-title=""></span>
-                        <span class="leancloud-visitors-count" style="color: rgb(94, 20, 41); float: right; padding-right: 10px">0</span>
+                        <span id="/vilog" class="leancloud-visitors" data-flag-title="">
+                            <span class="leancloud-visitors-count" style="color: rgb(94, 20, 41); float: right; padding-right: 10px">0</span>
+                        </span>
                     </div>
                     <div id="group-selector" v-show="config.showGroupManual" v-cloak>
                         <div>
