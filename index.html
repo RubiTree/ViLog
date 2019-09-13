@@ -251,7 +251,7 @@
                         <input type="text" style="background: none;border: none; width: 15px"
                             @keyup.enter="enterCommand" v-model="command">
                     </div>
-                    <div id="group-selector" v-show="config.showGroupManual">
+                    <div id="group-selector" v-show="config.showGroupManual" v-cloak>
                         <div>
                             <span>当前组:</span>
                             <select v-model="config.currentGroupIndex" @change="onSelectGroup" v-cloak>
