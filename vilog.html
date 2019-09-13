@@ -86,22 +86,11 @@
             grid-template-rows: 50% 50%;
         }
 
-        #filtered-log-container {
-            /* background-color: rgb(230, 224, 204); */
-            background-color: rgb(227, 233, 231);
-        }
-
         #all-log-container {
-            background-color: rgb(226, 226, 226);
             grid-column-start: 1;
             grid-column-end: 3;
 
             margin: 1px;
-        }
-
-        #regex-container {
-            background-color: #F5E4D4;
-            color: rgb(0, 36, 24);
         }
 
         .panel_1 {
@@ -120,6 +109,38 @@
             color: rgb(124, 124, 124);
         }
 
+
+        .filtered-log-container-c1 {
+            /* background-color: rgb(230, 224, 204); */
+            background-color: rgb(227, 233, 231);
+        }
+
+        .all-log-container-c1 {
+            /* background-color: rgb(234, 234, 239); */
+            background-color: rgb(226, 226, 226);
+        }
+
+        .regex-container-c1 {
+            /* background-color: rgb(236, 217, 212); */
+            /* background-color: #F5E4D4; */
+            background-color: rgb(248, 225, 203);
+            color: rgb(0, 36, 24);
+        }
+
+        .filtered_log_container_c2 {
+            background-color: rgb(222, 238, 233);
+        }
+
+        .all_log_container_c2 {
+            /* background-color: rgb(234, 234, 239); */
+            background-color: rgb(216, 216, 216);
+        }
+
+        .regex_container_c2 {
+            background-color: rgb(248, 234, 203);
+            color: rgb(0, 36, 24);
+        }
+
         /* 横屏 */
         @media screen and (min-aspect-ratio: 1/1) {
             #mian-content {
@@ -130,25 +151,12 @@
             }
 
             #filtered-log-container {
-                /* background-color: rgb(230, 224, 204); */
-                background-color: rgb(227, 233, 231);
-
                 flex-grow: 1;
             }
 
             #all-log-container {
-                /* background-color: rgb(234, 234, 239); */
-                background-color: rgb(226, 226, 226);
-
                 flex-grow: 1;
                 margin: 1px;
-            }
-
-            #regex-container {
-                /* background-color: rgb(236, 217, 212); */
-                background-color: #F5E4D4;
-                color: rgb(0, 36, 24);
-
             }
 
             .panel_1 {
@@ -174,9 +182,9 @@
         }
 
         li {
-            border-width: 0.1px;
+            /* border-width: 0.1px;
             border-color: rgba(223, 244, 250, 0.555);
-            border-style: solid;
+            border-style: solid; */
             word-wrap: break-word;
         }
 
@@ -187,7 +195,8 @@
         li:hover {
             /* background-color: rgba(209, 232, 252, 0.219); */
             border-color: rgba(55, 206, 248, 0.952);
-            border-width: 1.5px;
+            border-style: solid;
+            border-width: 1px;
         }
 
         .hover_item {
@@ -241,7 +250,7 @@
     <div id="app">
 
         <div id="mian-content">
-            <div id="regex-container" class="panel_1">
+            <div id="regex-container" class="panel_1 regex-container-c1">
                 <div class="manual-panel">
                     <div id="title">
                         <span style="color: rgb(241,234,188); font-weight:bold">ViLog</span>
@@ -251,7 +260,8 @@
                         <input type="text" style="background: none;border: none; width: 15px"
                             @keyup.enter="enterCommand" v-model="command">
                         <span id="/vilog" class="leancloud-visitors" data-flag-title="">
-                            <span class="leancloud-visitors-count" style="color: rgb(94, 20, 41); float: right; padding-right: 10px">0</span>
+                            <span class="leancloud-visitors-count"
+                                style="color: rgb(94, 20, 41); float: right; padding-right: 10px">0</span>
                         </span>
                     </div>
                     <div id="group-selector" v-show="config.showGroupManual" v-cloak>
@@ -301,8 +311,8 @@
                 </div>
 
                 <ul id="regex-list" v-cloak>
-                    <li v-for="sortedRegex in sortedRegexList" @click="onSelectRegex(sortedRegex)"
-                        :class="{ dissmiss_regex: sortedRegex.regex.dismiss , hover_item: sortedRegex.hover, foucus_item: sortedRegex.focus}"
+                    <li v-for="(sortedRegex, index) in sortedRegexList" @click="onSelectRegex(sortedRegex)"
+                        :class="{ dissmiss_regex: sortedRegex.regex.dismiss , hover_item: sortedRegex.hover, foucus_item: sortedRegex.focus, regex_container_c2: index % 2 != 0}"
                         @mouseenter="onMouseEnterRegex(sortedRegex)" @mouseleave="onMouseLeaveRegex(sortedRegex)">
                         <button @click.stop="removeRegex(sortedRegex)" class="circle_button">X</button>
                         <span>{{sortedRegex.regex.regexText}}</span>
@@ -311,10 +321,10 @@
                     </li>
                 </ul>
             </div>
-            <div id="filtered-log-container" class="panel_1">
+            <div id="filtered-log-container" class="panel_1 filtered-log-container-c1">
                 <ul id="note_list" v-cloak>
-                    <li v-for="sortedLine in sortedResultList"
-                        :class="{selected_item: sortedLine.select, key_item: sortedLine.key, hover_item: sortedLine.hover, foucus_item: sortedLine.focus}"
+                        <li v-for="(sortedLine, index) in sortedResultList"
+                        :class="{selected_item: sortedLine.select, key_item: sortedLine.key, hover_item: sortedLine.hover, foucus_item: sortedLine.focus, filtered_log_container_c2:index%2 != 0}"
                         @click="onSelectFilterLine(sortedLine)">
                         <span class="log_header">
                             {{sortedLine.line.content.slice(0, sortedLine.line.contentStartIndex)}}
@@ -326,10 +336,10 @@
                     </li>
                 </ul>
             </div>
-            <div id="all-log-container" class="panel_1">
+            <div id="all-log-container" class="panel_1 all-log-container-c1">
                 <ul id="window_list" v-cloak>
-                    <li v-for="contentLine in allContentList"
-                        :class="{ selected_item: contentLine.select, key_item: contentLine.key, foucus_item: contentLine.focus}"
+                        <li v-for="(contentLine, index) in allContentList"
+                        :class="{ selected_item: contentLine.select, key_item: contentLine.key, foucus_item: contentLine.focus, all_log_container_c2:index%2 != 0}"
                         @click="onSelectLog(contentLine)">
 
                         <span class="log_header">
