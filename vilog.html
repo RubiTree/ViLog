@@ -204,11 +204,12 @@
         }
 
         .selected_item {
-            background-color: rgba(209, 232, 252, 0.774);
+            /* background-color: rgba(194, 226, 255, 0.795); */
+            background-color: rgba(255, 209, 83, 0.404);
         }
 
         .foucus_item {
-            background-color: rgb(241, 204, 79);
+            background-color: rgb(255, 205, 68);
         }
 
         #group-selector {
@@ -316,8 +317,9 @@
                         @mouseenter="onMouseEnterRegex(sortedRegex)" @mouseleave="onMouseLeaveRegex(sortedRegex)">
                         <button @click.stop="removeRegex(sortedRegex)" class="circle_button">X</button>
                         <span>{{sortedRegex.regex.regexText}}</span>
-                        <font color="#1D6E94">{{ sortedRegex.getFocusProgress() }}</font>
-                        <button @click.stop="switchDismissRegex(sortedRegex)" class="circle_button">-</button>
+                
+                        <button @click.stop="switchDismissRegex(sortedRegex)" class="circle_button" style="float: right">-</button>
+                        <font color="#1D6E94" style="float: right">{{ sortedRegex.getFocusProgress() }}</font>
                     </li>
                 </ul>
             </div>
