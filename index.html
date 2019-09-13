@@ -355,23 +355,31 @@
         </div>
     </div>
 
-    <span id="/vilog.html" class="leancloud-visitors" data-flag-title="">
+    <!-- <span id="/vilog.html" class="leancloud-visitors" data-flag-title="">
         <i class="leancloud-visitors-count">0</i>
+    </span>
+    <div id="vcomments" style="display: none"></div> -->
+
+    <span id="/" class="leancloud-visitors" data-flag-title="" style="color:grey; font-size:10px">
+        已被第 <i class="leancloud-visitors-count">0</i> 次观察
     </span>
     <div id="vcomments" style="display: none"></div>
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
-    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+    <!-- <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script> -->
     <!-- <script src='dependency/Valine.min.js'></script> -->
-    <script src="dependency/vue.js"></script>
+    <!-- <script src="dependency/vue.js"></script> -->
     <script type="module" src="script/main.js"></script>
 
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
     <script>
         new Valine({
             el: '#vcomments',
             appId: 'fnTU2upQ0TyY3nweOUj5G2Ht-gzGzoHsz',
             appKey: 'UcOPNcgGvlpqvrGosTlH4jSY',
+            placeholder: '来都来了，不讲两句再走？',
             visitor: true
         })
     </script>
