@@ -1,3 +1,9 @@
+class Config {
+    showGroupManual = false
+    currentGroupIndex = 0
+    eanbleInternalFeature = false
+    eanbleUselessEffect = false
+}
 
 class Regex {
     dismiss = false
@@ -26,13 +32,10 @@ class RegexGroup {
         this.regexList.removeObject(regex)
     }
 
-    // 居然没找到直接添加数组的方法，先这么写了
-    merge(regexGroup) {
-        this.regexList = this.regexList.concat(regexGroup.regexList)
-    }
-
     replace(regexGroup) {
-        this.regexList = regexGroup.regexList
+        if (regexGroup.regexList) {
+            this.regexList = regexGroup.regexList
+        }
     }
 
     initSortedRegexList() {
@@ -71,8 +74,8 @@ class SortedLine {
     hover = false
     focus = false
 
-    constructor(content, indexOfContainer, lineIndex) {
-        this.content = content // string
+    constructor(line, indexOfContainer, lineIndex) {
+        this.line = line // BaseLine
         this.indexOfContainer = indexOfContainer // int
         this.lineIndex = lineIndex // int
     }
@@ -83,9 +86,18 @@ class ContentLine {
     key = false
     focus = false
 
+    constructor(line) {
+        this.line = line // BaseLine
+    }
+}
+
+class BaseLine {
+    contentStartIndex = 0
+    isError = false
+
     constructor(content) {
         this.content = content // string
     }
 }
 
-export { Regex, RegexGroup, SortedRegex, SortedLine, ContentLine }
+export { Config, Regex, RegexGroup, SortedRegex, SortedLine, ContentLine, BaseLine }

@@ -84,6 +84,10 @@ Array.prototype.findFirstLittleIndexInOrderList = function (number) {
     return this.length - 1
 }
 
+Array.prototype.clear = function () {
+    this.splice(0, this.length);
+}
+
 window.repeat = function (times, func) {
     for (let i = 0; i < times; i++) {
         func();
@@ -92,4 +96,8 @@ window.repeat = function (times, func) {
 
 window.getRandomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
+}
+
+Number.prototype.between = function (min, max) {
+    return Math.min(Math.max(this, min), max)
 }

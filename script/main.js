@@ -1,30 +1,61 @@
-import { Regex, RegexGroup, SortedRegex, SortedLine, ContentLine } from './model.js';
+import { Config, Regex, RegexGroup, SortedRegex, SortedLine, ContentLine, BaseLine } from './model.js';
 import './utils.js';
 
-// localStorage persistence
-var STORAGE_KEY = 'ViLog'
-var todoStorage = {
+let regexGroupsStorage = {
+    KEY: 'RegexGroups',
     fetch: function () {
-        let result = new RegexGroup("默认")
-        let storageJson = localStorage.getItem(STORAGE_KEY)
-        if (storageJson == null) return result
+        let result = []
+        let storageJson = localStorage.getItem(this.KEY)
+        if (storageJson != null) {
+            let gourpsData = JSON.parse(storageJson)
+            // json parse出来的对象没有方法，只能取里面的数据，对象要新建
+            gourpsData.forEach((groupData) => {
+                let group = new RegexGroup(groupData.name)
+                group.replace(groupData)
+                result.push(group)
+            })
+        }
 
-        // 大坑，json parse出来的对象没有方法，只能取里面的数据，对象要新建
-        result.merge(JSON.parse(storageJson))
+        if (result.length == 0) {
+            result.push(new RegexGroup("默认"))
+        }
+
         return result
     },
     save: function (regexGroup) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(regexGroup))
+        localStorage.setItem(this.KEY, JSON.stringify(regexGroup))
     }
 }
 
-var app = new Vue({
+let configStorage = {
+    KEY: 'Config',
+    fetch: function () {
+        let storageJson = localStorage.getItem(this.KEY)
+        if (storageJson != null) {
+            return JSON.parse(storageJson)
+        } else {
+            return new Config()
+        }
+    },
+    save: function (config) {
+        localStorage.setItem(this.KEY, JSON.stringify(config))
+    }
+}
+
+let app = new Vue({
     data: {
-        regexGroup: todoStorage.fetch(),
+        regexGroups: regexGroupsStorage.fetch(),
+        config: configStorage.fetch(),
+
+        isLoading: false,
+
+        command: "",
+
         sortedRegexList: [],
         sortedResultList: [],
         allContentList: [],
 
+        newGroupName: "",
         newRegex: "",
         importRegexGroup: "",
 
@@ -34,7 +65,18 @@ var app = new Vue({
         currentFocusLog: null,
     },
     mounted: function () {
-        this.sortedRegexList = this.regexGroup.initSortedRegexList()
+        // 更正 config 中的 currentGroup
+        this.config.currentGroupIndex = this.config.currentGroupIndex.between(0, this.regexGroups.length - 1)
+
+        this._initSortedRegexList()
+    },
+    computed: {
+        currentGroup: function () {
+            return this.regexGroups[this.config.currentGroupIndex]
+        },
+        groupManualStateTips: function () {
+            return this.config.showGroupManual ? "∨" : "∧"
+        }
     },
     watch: {
         currentFocusFilterLog: function (newFilterLog, oldFilterLog) {
@@ -44,13 +86,24 @@ var app = new Vue({
         }
     },
     methods: {
+        onSelectGroup: function (e) {
+            this._onlyChangeCurrentGroupIndex(e.target.options.selectedIndex)
+            this._clearLastRegex()
+            this._onChangeRegex()
+        },
+        // not change regex
+        _onlyChangeCurrentGroupIndex(newIndex) {
+            this.config.currentGroupIndex = newIndex
+            this._saveConfig()
+        },
+        _saveConfig() {
+            setTimeout(() => configStorage.save(this.config), 0);
+        },
         onSelectRegex: function (sortedRegex) {
             if (sortedRegex.resultLines.length == 0) return
 
             this._clearLastRegex()
-
             this._focusItem(sortedRegex)
-            this.globalFocusItem = sortedRegex
 
             sortedRegex.resultLines.forEach((index) => {
                 this.sortedResultList[index].select = true
@@ -60,6 +113,13 @@ var app = new Vue({
             let from = _getFilterLogContainerCenterItemIndex()
             let to = sortedRegex.resultLines.findNearestValueInOrderList(from) // 需要放视觉中心的
             this._switchFocusFilteredLog(to)
+
+            this.globalFocusItem = this.currentFocusFilterLog // 选择了regex后，直接把全局焦点放到对应的regex结果上，更符合操作习惯
+        },
+
+        switchGroupManualShowState: function () {
+            this.config.showGroupManual = !this.config.showGroupManual
+            setTimeout(() => configStorage.save(this.config), 0);
         },
 
         _switchFocusFilteredLog(index) {
@@ -72,7 +132,7 @@ var app = new Vue({
 
         _clearLastRegex: function () {
             // 清理 select
-            if (this.currentFocusRegex != null) {
+            if (this.currentFocusRegex != null && this.currentFocusRegex.resultLines != null) {
                 this.currentFocusRegex.resultLines.forEach((index) => {
                     this.sortedResultList[index].select = false
                     this.allContentList[this.sortedResultList[index].lineIndex].select = false
@@ -128,14 +188,16 @@ var app = new Vue({
             }
         },
 
-        // 作用不大
+        // 作用不大，只是好看
         onMouseEnterRegex: function (sortedRegex) {
+            if (!this.config.eanbleUselessEffect) return
             if (sortedRegex.resultLines.length == 0) return
+
             sortedRegex.hover = true
             sortedRegex.resultLines.forEach((index) => this.sortedResultList[index].hover = true)
         },
-        // 作用不大
         onMouseLeaveRegex: function (sortedRegex) {
+            if (!this.config.eanbleUselessEffect) return
             if (sortedRegex.resultLines.length == 0) return
 
             sortedRegex.hover = false
@@ -143,48 +205,101 @@ var app = new Vue({
         },
 
         addRegex: function () {
-            this.newRegex = this.newRegex.replace(/\n$/g,'');
+            this.newRegex = this.newRegex.replace(/\n$/g, '');
             if (isStringEmpty(this.newRegex)) return
 
-            this.regexGroup.addRegex(new Regex(this.newRegex))
+            this.currentGroup.addRegex(new Regex(this.newRegex))
             this.newRegex = ""
 
             this._onChangeRegex()
         },
 
         importRegex: function () {
-            if (confirm(`导入会清空已有规则，确保已经导出备份了已有规则，确定要导入吗？`)) {
-                let newRegexGroup = JSON.parse(this.importRegexGroup)
+            if (confirm(`导入的Regex组会直接添加到现有组中，可能会出现重复，可以提前处理好要导入的Json或者导入后使用删除当前组进行删除，确定要导入吗？`)) {
+                let importRegexGroupsData = JSON.parse(this.importRegexGroup)
                 this.importRegexGroup = ""
-                if (newRegexGroup == null) {
+                if (importRegexGroupsData == null) {
                     toast("请把正确的regex贴到输入框")
                     return
                 }
 
-                this.regexGroup.replace(newRegexGroup)
+                let importGroupNames = []
+                let importRegexCount = 0
+
+                importRegexGroupsData.forEach((groupData) => {
+                    let group = new RegexGroup(groupData.name)
+                    group.replace(groupData)
+                    this.regexGroups.push(group)
+
+                    importGroupNames.push(group.name)
+                    importRegexCount += group.regexList.length
+                })
+
+                setTimeout(() => regexGroupsStorage.save(this.regexGroups), 0);
+
+                toast(`恭喜已经成功导入 ${importGroupNames.length} 组共 ${importRegexCount} 条规则`)
+            }
+        },
+
+        addGroupAndSwitch: function () {
+            this.newGroupName = this.newGroupName.trim();
+            if (isStringEmpty(this.newGroupName)) return
+
+            this.regexGroups.push(new RegexGroup(this.newGroupName))
+            this.newGroupName = ""
+
+            this._clearLastRegex()
+            this._onlyChangeCurrentGroupIndex(this.regexGroups.length - 1)
+            this._onChangeRegex()
+        },
+
+        removeCurrentGroup: function () {
+            if (confirm(`删除的组不可恢复，请及时做好备份，确定要删除「${this.currentGroup.name}」组吗？`)) {
+                this._clearLastRegex()
+                this.regexGroups.removeObject(this.currentGroup)
+
+                if (this.regexGroups.length == 0) {
+                    this.regexGroups.push(new RegexGroup("默认"))
+                }
+
+                this._onlyChangeCurrentGroupIndex(Math.max(0, this.config.currentGroupIndex - 1))
                 this._onChangeRegex()
             }
         },
 
-        exportRegex: function () {
-            exportContentToClipboard(JSON.stringify(this.regexGroup))
+        removeAllGroups: function () {
+            if (confirm(`删除的组不可恢复，请及时做好备份，确定要删除全部 ${this.regexGroups.length} 组吗？`)) {
+                this._clearLastRegex()
+                this.regexGroups.clear()
+                this.regexGroups.push(new RegexGroup("默认"))
+                this._onlyChangeCurrentGroupIndex(0)
+                this._onChangeRegex()
+            }
+        },
+
+        exportCurrentGroup: function () {
+            exportContentToClipboard(JSON.stringify([this.currentGroup]))
+        },
+
+        exportAllGroups: function () {
+            exportContentToClipboard(JSON.stringify(this.regexGroups))
         },
 
         simpleCopyRegex: function () {
-            exportContentToClipboard(this.regexGroup.regexList.map((regex) => regex.regexText).join("|"))
+            exportContentToClipboard(this.currentGroup.regexList.map((regex) => regex.regexText).join("|"))
         },
 
         exportFilterResult: function () {
             // 这里有时候需要加<br>，有时候不需要...
-            exportContentToClipboard(this.sortedResultList.map((sortedLine) => sortedLine.content).join("\n"))
+            exportContentToClipboard(this.sortedResultList.map((sortedLine) => sortedLine.line.content).join("\n"))
         },
 
         removeRegex: function (sortedRegex) {
-            if (confirm(`确定要删除这条规则「${sortedRegex.regex.regexText}」吗？`)) {
+            if (confirm(`删除的规则不可恢复，确定要删除这条规则「${sortedRegex.regex.regexText}」吗？`)) {
                 if (this.currentFocusRegex === sortedRegex) {
                     this._clearLastRegex()
                 }
-                this.regexGroup.removeRegex(sortedRegex.regex)
+                this.currentGroup.removeRegex(sortedRegex.regex)
                 this._onChangeRegex()
             }
         },
@@ -198,39 +313,49 @@ var app = new Vue({
         },
 
         _onChangeRegex: function () {
-
             this._reRenderContentAfterNewRegex()
             // save 放下一个事件循环流里
 
-            setTimeout(() => todoStorage.save(this.regexGroup), 0);
+            setTimeout(() => regexGroupsStorage.save(this.regexGroups), 0);
         },
 
         // todo 这里可以优化成只搜索新增regex
         _reRenderContentAfterNewRegex: function () {
-            app.sortedRegexList = app.regexGroup.initSortedRegexList()
-            app.sortedResultList = []
+            this.isLoading = true
 
-            let sortedRegexList = app.sortedRegexList;
-            let sortedResultList = app.sortedResultList;
+            // 不这样会没有效果，因为vue会在下一个事件循环中进行渲染
+            setTimeout(() => {
+                this._initSortedRegexList()
+                this.sortedResultList = []
 
-            app.allContentList.forEach((logLine, index) => {
-                let isThisLineAdded = false;
+                let sortedRegexList = this.sortedRegexList;
+                let sortedResultList = this.sortedResultList;
 
-                for (let i = 0; i < sortedRegexList.length; i++) {
-                    if (sortedRegexList[i].regex.dismiss) continue
+                this.allContentList.forEach((logLine, index) => {
+                    let isThisLineAdded = false;
 
-                    if (logLine.content.search(new RegExp(sortedRegexList[i].regex.regexText, 'i')) > -1) {
-                        if (!isThisLineAdded) {
-                            // 给搜索结果列表加上这行，不能重复加
-                            sortedResultList.push(new SortedLine(logLine.content, sortedResultList.length, index))
-                            isThisLineAdded = true
+                    for (let i = 0; i < sortedRegexList.length; i++) {
+                        if (sortedRegexList[i].regex.dismiss) continue
+
+                        if (logLine.line.content.search(new RegExp(sortedRegexList[i].regex.regexText, 'i')) > -1) {
+                            if (!isThisLineAdded) {
+                                // 给搜索结果列表加上这行，不能重复加
+                                sortedResultList.push(new SortedLine(logLine.line, sortedResultList.length, index))
+                                isThisLineAdded = true
+                            }
+
+                            // 给regex的结果序号里加上它在搜索结果里的序号，可以重复加
+                            sortedRegexList[i].addLine(sortedResultList.length - 1);
                         }
-
-                        // 给regex的结果序号里加上它在搜索结果里的序号，可以重复加
-                        sortedRegexList[i].addLine(sortedResultList.length - 1);
                     }
-                }
-            })
+                })
+
+                this.isLoading = false
+            }, 0)
+        },
+
+        _initSortedRegexList: function () {
+            this.sortedRegexList = this.regexGroups[this.config.currentGroupIndex].initSortedRegexList()
         },
 
         onRegexConatinerKeyEnterAndDown() {
@@ -274,6 +399,21 @@ var app = new Vue({
         // onAllLogContainerKeyDown() {
 
         // },
+
+        enterCommand: function () {
+            this.command = this.command.trim();
+            if (isStringEmpty(this.command)) return
+
+            // 下一次生效
+            if (this.command == 'i') {
+                this.config.eanbleInternalFeature = !this.config.eanbleInternalFeature
+            } else if (this.command == 'useless') {
+                this.config.eanbleUselessEffect = !this.config.eanbleUselessEffect
+            }
+            this.command = ""
+
+            this._saveConfig()
+        },
     },
 
     created: function () {
@@ -308,17 +448,6 @@ var app = new Vue({
 });
 app.$mount('#app');
 
-// 是不是可以放到vue组件的生命周期里
-// (function createTestData() {
-//     let regexGroup = app.regexGroup
-//     regexGroup.addRegex(new Regex("当前页面：VideoPublishActivity"))
-//     regexGroup.addRegex(new Regex("ConcurrentUploadByFile"))
-//     regexGroup.addRegex(new Regex("TTUploader"))
-//     regexGroup.addRegex(new Regex("ShortVideoPublishService"))
-
-//     app.sortedRegexList = regexGroup.initSortedRegexList()
-// })();
-
 (function forbidBack() {
     history.pushState(null, null, document.URL);
     window.addEventListener('popstate', function () {
@@ -341,6 +470,8 @@ app.$mount('#app');
         e.stopPropagation();
         e.preventDefault();
 
+        app.isLoading = true;
+
         var files = e.dataTransfer.files;
         var file = files[0];
         var reader = new FileReader();
@@ -355,6 +486,7 @@ app.$mount('#app');
 })();
 
 function renderNewContent(logText) {
+    app._reRenderContentAfterNewRegex()
     clearContent()
 
     let logLines = logText.split('\n');
@@ -365,13 +497,18 @@ function renderNewContent(logText) {
     logLines.forEach((logLine, index) => {
         let isThisLineAdded = false;
 
+        let baseLine = new BaseLine(logLine)
+        if (app.config.eanbleInternalFeature) {
+            processBaseLineByInternel(baseLine)
+        }
+
         for (let i = 0; i < sortedRegexList.length; i++) {
             if (sortedRegexList[i].regex.dismiss) continue
 
             if (logLine.search(sortedRegexList[i].regex.regexText) > -1) {
                 if (!isThisLineAdded) {
                     // 给搜索结果列表加上这行，不能重复加
-                    sortedResultList.push(new SortedLine(logLine, sortedResultList.length, index))
+                    sortedResultList.push(new SortedLine(baseLine, sortedResultList.length, index))
                     isThisLineAdded = true
                 }
 
@@ -380,8 +517,22 @@ function renderNewContent(logText) {
             }
         }
 
-        allContentList.push(new ContentLine(logLine))
+        allContentList.push(new ContentLine(baseLine))
     })
+}
+
+function processBaseLineByInternel(baseLine) {
+    baseLine.content = baseLine.content.replace(new RegExp(/GMT\+08:00/, 'g'), "+8")
+    baseLine.content = baseLine.content.replace(new RegExp(/2019\-/, 'g'), "")
+
+    if (baseLine.content.search(/\[E\]/) > -1) {
+        baseLine.isError = true
+    }
+
+    let contentIndex = baseLine.content.search(/(?<=(\[.*\]){5,7}).*/)
+    if (contentIndex > -1) {
+        baseLine.contentStartIndex = contentIndex
+    }
 }
 
 function clearContent() {
