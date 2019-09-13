@@ -594,7 +594,8 @@ function _getFilterLogContainerCenterItemIndex() {
 
 // 把to滚动到视觉中心
 function _scrollIndexToCenterInFilterLogContainer(index) {
-    filteredLogContainer.scrollTop = filteredLogContainer.childNodes[0].childNodes[index].offsetTop - 200
+    let windowHeight = window.innerHeight
+    filteredLogContainer.scrollTop = filteredLogContainer.childNodes[0].childNodes[index].offsetTop - windowHeight / 3
 }
 
 // 把to滚动到视觉中心
@@ -602,12 +603,11 @@ function _scrollIndexToCenterInLogContainer(index) {
     let windowHeight = window.innerHeight
     let windowWidth = window.innerWidth
     if (windowHeight > windowWidth) {
-        allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - 200 - windowHeight / 2
+        allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - 5 * windowHeight / 6
     } else {
-        allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - 200
+        allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - windowHeight / 3
     }
 }
-
 
 function isStringEmpty(obj) {
     if (typeof obj == "undefined" || obj == null || obj == "") {
@@ -616,3 +616,10 @@ function isStringEmpty(obj) {
         return false;
     }
 }
+
+new Valine({
+    el: '#vcomments',
+    appId: 'fnTU2upQ0TyY3nweOUj5G2Ht-gzGzoHsz',
+    appKey: 'UcOPNcgGvlpqvrGosTlH4jSY',
+    visitor: true
+})

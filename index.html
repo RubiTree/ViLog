@@ -12,11 +12,25 @@
             display: none;
         }
 
+        /* mac上始终显示滚动条 */
+        ::-webkit-scrollbar {
+            -webkit-appearance: none;
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, .5);
+            box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+        }
+
         html,
         body {
             margin: 0px;
             height: 100%;
             width: 100%;
+
+            overflow: hidden;
 
             color: #404040;
             font: 12px/1.5 "Lucida Grande", "Helvetica Neue", Helvetica, Arial, 'PingFang SC', "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", "WenQuanYi Microhei", "Heiti SC", "STHeiti", "Noto Sans CJK SC", "Source Han Sans CN", sans-serif;
@@ -91,7 +105,7 @@
         }
 
         .panel_1 {
-            overflow: auto;
+            overflow-y: scroll;
         }
 
         .error_log_content {
@@ -140,7 +154,7 @@
             .panel_1 {
                 height: 100%;
                 flex-basis: 250px;
-                overflow: auto;
+                overflow-y: scroll;
             }
         }
 
@@ -315,7 +329,6 @@
                         :class="{ selected_item: contentLine.select, key_item: contentLine.key, foucus_item: contentLine.focus}"
                         @click="onSelectLog(contentLine)">
 
-                        <!-- 跟上面可以复用 -->
                         <span class="log_header">
                             {{contentLine.line.content.slice(0, contentLine.line.contentStartIndex)}}
                         </span>
@@ -342,7 +355,13 @@
         </div>
     </div>
 
+    <span id="/" class="leancloud-visitors" data-flag-title="" style="display: none">
+        <i class="leancloud-visitors-count">0</i>
+    </span>
+    <div id="vcomments" style="display: none"></div>
+
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
     <script src="dependency/vue.js"></script>
     <script type="module" src="script/main.js"></script>
 </body>
