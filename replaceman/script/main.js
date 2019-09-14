@@ -188,6 +188,8 @@ app.$mount('#app');
 
 function exportContentToClipboard(content) {
     let transfer = document.createElement('textarea');
+    // 不这么设置屏幕会跳，具体哪儿有问题还没确定
+    transfer.style.cssText = "width:30%;padding:2%;min-width: 100px;opacity: 0.5;color: rgb(255, 255, 255);line-height: 18px;text-align: center;border-radius: 5px;position: fixed;top: 50%;left: 30%;z-index: 999999;background: rgb(0, 0, 0);font-size: 15px;";
     document.body.appendChild(transfer);
     transfer.value = content;  // 这里表示想要复制的内容
     transfer.focus();
@@ -196,8 +198,8 @@ function exportContentToClipboard(content) {
         document.execCommand('copy');
     }
     transfer.blur();
-    toast('已经复制到剪贴板啦');
     document.body.removeChild(transfer);
+    toast('已经复制到剪贴板啦');
 }
 
 // 浮层
