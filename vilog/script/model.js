@@ -1,9 +1,16 @@
 class Config {
     showGroupManual = false
     currentGroupIndex = 0
+
+    enableChangeRegexOrder = false // 不持久化，每次恢复都清除
+
     eanbleInternalFeature = false
     eanbleUselessEffect = false
     eanbleLogTips = false
+
+    clear(){
+        this.enableChangeRegexOrder = false
+    }
 }
 
 class Regex {
