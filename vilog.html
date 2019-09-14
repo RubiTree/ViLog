@@ -209,7 +209,7 @@
         }
 
         .foucus_item {
-            background-color: rgb(255, 205, 68);
+            background-color: rgb(255, 199, 45);
         }
 
         #group-selector {
@@ -243,6 +243,40 @@
             background: white;
             margin: 0px;
             padding: 0px
+        }
+
+        .log_tips_line {
+            background: rgb(133, 250, 250);
+            border: none;
+            width: 100%;
+        }
+
+        /* switch直接隐藏的方案 */
+        /* .log_tips_switch {
+            visibility: hidden;
+            float: right;
+        } */
+
+        /* .log_tips_switch:before {
+            display: inline-block;
+            content: '';
+            visibility: visible;
+            width: 12px;
+            height: 12px;
+        }
+
+        .log_tips_switch:hover {
+            content: '';
+            visibility: visible;
+        } */
+
+        /* switch半透明的方案 */
+        .log_tips_switch {
+            float: right;
+            opacity: 0.3;
+        }
+        .log_tips_switch:hover {
+            opacity: 1;
         }
     </style>
 </head>
@@ -317,40 +351,62 @@
                         @mouseenter="onMouseEnterRegex(sortedRegex)" @mouseleave="onMouseLeaveRegex(sortedRegex)">
                         <button @click.stop="removeRegex(sortedRegex)" class="circle_button">X</button>
                         <span>{{sortedRegex.regex.regexText}}</span>
-                
-                        <button @click.stop="switchDismissRegex(sortedRegex)" class="circle_button" style="float: right">-</button>
+
+                        <button @click.stop="switchDismissRegex(sortedRegex)" class="circle_button"
+                            style="float: right">-</button>
                         <font color="#1D6E94" style="float: right">{{ sortedRegex.getFocusProgress() }}</font>
                     </li>
                 </ul>
             </div>
             <div id="filtered-log-container" class="panel_1 filtered-log-container-c1">
                 <ul id="note_list" v-cloak>
-                        <li v-for="(sortedLine, index) in sortedResultList"
+                    <li v-for="(sortedLine, index) in sortedResultList"
                         :class="{selected_item: sortedLine.select, key_item: sortedLine.key, hover_item: sortedLine.hover, foucus_item: sortedLine.focus, filtered_log_container_c2:index%2 != 0}"
                         @click="onSelectFilterLine(sortedLine)">
-                        <span class="log_header">
-                            {{sortedLine.line.content.slice(0, sortedLine.line.contentStartIndex)}}
-                        </span>
-                        <span
-                            :class="{error_log_content: sortedLine.line.isError, normal_log_content: !sortedLine.line.isError}">
-                            {{sortedLine.line.content.slice(sortedLine.line.contentStartIndex)}}
-                        </span>
+
+                        <div v-if="config.eanbleLogTips" v-show="sortedLine.line.enableTips">
+                            <input type="text" class="log_tips_line" placeholder="输入 Tips，自动保存"
+                                v-model="sortedLine.line.tips">
+                        </div>
+
+                        <div>
+                            <span class="log_header">
+                                {{sortedLine.line.content.slice(0, sortedLine.line.contentStartIndex)}}
+                            </span>
+                            <span
+                                :class="{error_log_content: sortedLine.line.isError, normal_log_content: !sortedLine.line.isError}">
+                                {{sortedLine.line.content.slice(sortedLine.line.contentStartIndex)}}
+                            </span>
+                            <input v-if="config.eanbleLogTips" type="checkbox" id="checkbox" class="log_tips_switch"
+                                v-model="sortedLine.line.enableTips">
+                        </div>
+
                     </li>
                 </ul>
             </div>
             <div id="all-log-container" class="panel_1 all-log-container-c1">
                 <ul id="window_list" v-cloak>
-                        <li v-for="(contentLine, index) in allContentList"
+                    <li v-for="(contentLine, index) in allContentList"
                         :class="{ selected_item: contentLine.select, key_item: contentLine.key, foucus_item: contentLine.focus, all_log_container_c2:index%2 != 0}"
                         @click="onSelectLog(contentLine)">
 
-                        <span class="log_header">
-                            {{contentLine.line.content.slice(0, contentLine.line.contentStartIndex)}}
-                        </span>
-                        <span
-                            :class="{error_log_content: contentLine.line.isError, normal_log_content:!contentLine.line.isError}">
-                            {{contentLine.line.content.slice(contentLine.line.contentStartIndex)}}
-                        </span>
+                        <div v-if="config.eanbleLogTips" v-show="contentLine.line.enableTips">
+                            <input type="text" class="log_tips_line" placeholder="输入 Tips，自动保存"
+                                v-model="contentLine.line.tips">
+                        </div>
+
+                        <div>
+                            <span class="log_header">
+                                {{contentLine.line.content.slice(0, contentLine.line.contentStartIndex)}}
+                            </span>
+                            <span
+                                :class="{error_log_content: contentLine.line.isError, normal_log_content:!contentLine.line.isError}">
+                                {{contentLine.line.content.slice(contentLine.line.contentStartIndex)}}
+                            </span>
+                            <input v-if="config.eanbleLogTips" type="checkbox" id="checkbox" class="log_tips_switch"
+                                v-model="contentLine.line.enableTips">
+                        </div>
+
                     </li>
                 </ul>
             </div>

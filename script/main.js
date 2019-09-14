@@ -291,7 +291,13 @@ let app = new Vue({
 
         exportFilterResult: function () {
             // 这里有时候需要加<br>，有时候不需要...
-            exportContentToClipboard(this.sortedResultList.map((sortedLine) => sortedLine.line.content).join("\n"))
+            exportContentToClipboard(this.sortedResultList.map((sortedLine) => {
+                let result = sortedLine.line.content
+                if (this.config.eanbleLogTips && sortedLine.line.enableTips && !isStringEmpty(sortedLine.line.tips)) {
+                    result = `【Tips: ${sortedLine.line.tips}】\n${result}`
+                }
+                return result
+            }).join("\n"))
         },
 
         removeRegex: function (sortedRegex) {
@@ -364,8 +370,7 @@ let app = new Vue({
 
         onFilteredLogContainerKeyEnter(isShift) {
             if (this.currentFocusRegex != null) {
-                if (this.currentFocusFilterLog != null) this.currentFocusFilterLog.focus = false
-                if (this.currentFocusLog != null) this.currentFocusLog.focus = false
+                this._clearLogFocus()
 
                 let next = 0
                 if (isShift) {
@@ -376,9 +381,23 @@ let app = new Vue({
                 this._switchFocusFilteredLog(next)
             }
         },
-        // onFilteredLogContainerKeyDown() {
-        //     toast("onFilteredLogContainerKeyDown")
-        // },
+
+        _clearLogFocus() {
+            if (this.currentFocusFilterLog != null) this.currentFocusFilterLog.focus = false
+            if (this.currentFocusLog != null) this.currentFocusLog.focus = false
+        },
+
+        onFilteredLogContainerKeyUpDown(isUp) {
+            this._clearLogFocus()
+
+            let next = this.currentFocusFilterLog.indexOfContainer
+            if (isUp) {
+                next--
+            } else {
+                next++
+            }
+            this._switchFocusFilteredLog(next.between(0, this.sortedResultList.length - 1))
+        },
 
         onAllLogContainerKeyEnter(isShift) {
             if (this.currentFocusFilterLog != null) {
@@ -409,6 +428,8 @@ let app = new Vue({
                 this.config.eanbleInternalFeature = !this.config.eanbleInternalFeature
             } else if (this.command == 'useless') {
                 this.config.eanbleUselessEffect = !this.config.eanbleUselessEffect
+            } else if (this.command == 'tips') {
+                this.config.eanbleLogTips = !this.config.eanbleLogTips
             }
             this.command = ""
 
@@ -433,16 +454,11 @@ let app = new Vue({
                 } else if (_this.globalFocusItem instanceof ContentLine) {
                     _this.onAllLogContainerKeyEnter(window.event.shiftKey)
                 }
+            } else if (key == "ArrowUp" || key == "ArrowDown") {
+                if (_this.globalFocusItem instanceof SortedLine) {
+                    _this.onFilteredLogContainerKeyUpDown(key == "ArrowUp")
+                }
             }
-            // else if (key == 40) {
-            //     if (_this.globalFocusItem instanceof SortedRegex) {
-            //         _this.onRegexConatinerKeyEnterAndDown()
-            //     } else if (_this.globalFocusItem instanceof SortedLine) {
-            //         _this.onFilteredLogContainerKeyDown()
-            //     } else if (_this.globalFocusItem instanceof ContentLine) {
-            //         _this.onAllLogContainerKeyDown()
-            //     }
-            // }
         };
     },
 });
@@ -524,12 +540,13 @@ function renderNewContent(logText) {
 function processBaseLineByInternel(baseLine) {
     baseLine.content = baseLine.content.replace(new RegExp(/GMT\+08:00/, 'g'), "+8")
     baseLine.content = baseLine.content.replace(new RegExp(/2019\-/, 'g'), "")
+    baseLine.content = baseLine.content.replace(new RegExp(/\[, , \]/, 'g'), "")
 
     if (baseLine.content.search(/\[E\]/) > -1) {
         baseLine.isError = true
     }
 
-    let contentIndex = baseLine.content.search(/(?<=(\[.*\]){5,7}).*/)
+    let contentIndex = baseLine.content.search(/(?<=(\[.*\]){4,7}).*/)
     if (contentIndex > -1) {
         baseLine.contentStartIndex = contentIndex
     }
@@ -621,6 +638,5 @@ new Valine({
     el: '#vcomments',
     appId: 'fnTU2upQ0TyY3nweOUj5G2Ht-gzGzoHsz',
     appKey: 'UcOPNcgGvlpqvrGosTlH4jSY',
-    placeholder: '来都来了，不讲两句再走？',
     visitor: true
 })

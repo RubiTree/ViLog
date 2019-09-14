@@ -3,6 +3,7 @@ class Config {
     currentGroupIndex = 0
     eanbleInternalFeature = false
     eanbleUselessEffect = false
+    eanbleLogTips = false
 }
 
 class Regex {
@@ -94,6 +95,8 @@ class ContentLine {
 class BaseLine {
     contentStartIndex = 0
     isError = false
+    enableTips = false
+    tips = ""
 
     constructor(content) {
         this.content = content // string
