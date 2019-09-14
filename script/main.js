@@ -426,14 +426,21 @@ let app = new Vue({
             // 下一次生效
             if (this.command == 'i') {
                 this.config.eanbleInternalFeature = !this.config.eanbleInternalFeature
+                _toastModeStatus(this.config.eanbleInternalFeature, "内部特性")
             } else if (this.command == 'useless') {
                 this.config.eanbleUselessEffect = !this.config.eanbleUselessEffect
+                _toastModeStatus(this.config.eanbleUselessEffect, "无用特性")
             } else if (this.command == 'tips') {
                 this.config.eanbleLogTips = !this.config.eanbleLogTips
+                _toastModeStatus(this.config.eanbleLogTips, "Tips")
             }
             this.command = ""
 
             this._saveConfig()
+        },
+        _toastModeStatus(isOpen, modeName) {
+            let state = isOpen ? "启用" : "关闭"
+            toast(`已${state}「${modeName}」模式`)
         },
     },
 
