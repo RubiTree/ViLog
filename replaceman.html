@@ -12,6 +12,18 @@
             display: none;
         }
 
+        /* mac上始终显示滚动条 */
+        ::-webkit-scrollbar {
+            -webkit-appearance: none;
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, .5);
+            box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+        }
+
 
         html,
         body {
@@ -51,9 +63,9 @@
         }
 
         .panel_1 {
-            overflow-y: scroll;
             height: 100%;
             width: 100%;
+            overflow: scroll;
         }
 
         /* 横屏 */
@@ -82,13 +94,14 @@
             .panel_1 {
                 height: 100%;
             width: 100%;
-            overflow-y: scroll;
+            overflow: scroll;
             }
         }
 
         .bigInput {
-            width: 98%;
+            width: 99%;
             height: 99%;
+            overflow-y: scroll;
         }
 
         #new-regex {
