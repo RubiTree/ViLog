@@ -12,11 +12,14 @@
             display: none;
         }
 
+
         html,
         body {
             margin: 0px;
+            padding: 0px;
             height: 100%;
             width: 100%;
+            overflow: hidden;
 
             font: 14px/1.5 "Lucida Grande", "Helvetica Neue", Helvetica, Arial, 'PingFang SC', "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", "WenQuanYi Microhei", "Heiti SC", "STHeiti", "Noto Sans CJK SC", "Source Han Sans CN", sans-serif;
         }
@@ -48,7 +51,9 @@
         }
 
         .panel_1 {
-            overflow: auto;
+            overflow-y: scroll;
+            height: 100%;
+            width: 100%;
         }
 
         /* 横屏 */
@@ -76,13 +81,14 @@
 
             .panel_1 {
                 height: 100%;
-                overflow: auto;
+            width: 100%;
+            overflow-y: scroll;
             }
         }
 
         .bigInput {
-            width: 100%;
-            height: 100%;
+            width: 98%;
+            height: 99%;
         }
 
         #new-regex {
