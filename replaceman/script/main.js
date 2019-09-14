@@ -222,3 +222,10 @@ function isStringEmpty(obj) {
         return false;
     }
 }
+
+new Valine({
+    el: '#vcomments',
+    appId: 'fnTU2upQ0TyY3nweOUj5G2Ht-gzGzoHsz',
+    appKey: 'UcOPNcgGvlpqvrGosTlH4jSY',
+    visitor: true
+})
