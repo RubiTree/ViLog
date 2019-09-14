@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ReplaceMan</title>
+    <meta name="author" content="RubiTree" />
+    <link rel="bookmark" type="image/x-icon" href="replaceman/resource/favicon.ico" />
+    <link rel="shortcut icon" href="replaceman/resource/favicon.ico" />
+
+    <style type="text/css">
+        [v-cloak] {
+            display: none;
+        }
+
+        html,
+        body {
+            margin: 0px;
+            height: 100%;
+            width: 100%;
+
+            font: 14px/1.5 "Lucida Grande", "Helvetica Neue", Helvetica, Arial, 'PingFang SC', "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei", "WenQuanYi Microhei", "Heiti SC", "STHeiti", "Noto Sans CJK SC", "Source Han Sans CN", sans-serif;
+        }
+
+
+        /* 竖屏（todo 混合固定值和比例） */
+        #app {
+            display: grid;
+            height: 100%;
+            width: 100%;
+            grid-template-columns: 25% 75%;
+            grid-template-rows: 50% 50%;
+        }
+
+        #replace-result-container {
+            background-color: rgb(207, 207, 207);
+        }
+
+        #replace-src-container {
+            background-color: rgb(238, 236, 236);
+        }
+
+        #regex-container {
+            background-color: rgb(189, 187, 187);
+            color: rgb(0, 36, 24);
+
+            grid-row-start: 1;
+            grid-row-end: 3;
+        }
+
+        .panel_1 {
+            overflow: auto;
+        }
+
+        /* 横屏 */
+        @media screen and (min-aspect-ratio: 1/1) {
+            #app {
+                display: grid;
+                height: 100%;
+                width: 100%;
+                grid-template-columns: 30% 35% 35%;
+                grid-template-rows: 100%;
+            }
+
+            #replace-result-container {
+                background-color: rgb(207, 207, 207);
+            }
+
+            #replace-src-container {
+                background-color: rgb(238, 236, 236);
+            }
+
+            #regex-container {
+                background-color: rgb(189, 187, 187);
+                color: rgb(0, 36, 24);
+            }
+
+            .panel_1 {
+                height: 100%;
+                overflow: auto;
+            }
+        }
+
+        .bigInput {
+            width: 100%;
+            height: 100%;
+        }
+
+        #new-regex {
+            width: 95%;
+            height: 30px;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            border-width: 0.1px;
+            border-color: rgba(223, 244, 250, 0.555);
+            border-style: solid;
+            word-wrap: break-word;
+        }
+
+        .dissmiss_regex {
+            color: rgb(211, 209, 209)
+        }
+
+        .regex_name_text {
+            color: rgb(53, 250, 250)
+        }
+
+        .regex_from_text {
+            color: rgb(88, 0, 0)
+        }
+
+        .regex_to_text {
+            color: rgb(13, 2, 114)
+        }
+
+        li:hover {
+            /* background-color: rgba(209, 232, 252, 0.219); */
+            border-color: rgba(55, 206, 248, 0.952);
+            border-width: 1.5px;
+        }
+
+        .hover_item {
+            background-color: rgba(209, 232, 252, 0.219);
+        }
+
+        .selected_item {
+            background-color: rgba(209, 232, 252, 0.774);
+        }
+
+        .foucus_item {
+            background-color: rgb(241, 204, 79);
+        }
+
+        .manual-panel {
+            background-color: rgba(182, 3, 3, 0.829);
+            padding: 5px;
+        }
+
+        .key_item {
+            background-color: rgb(241, 125, 79) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div id="regex-container" class="panel_1">
+            <div class="manual-panel">
+                <div>
+                    <input type="text" placeholder="name" v-model="newReplacerName">
+                    <input type="text" placeholder="replace from (enter)" v-model="newReplacerFrom"
+                        @keyup.enter="addReplacer">
+                    <input type="text" placeholder="replace to (enter)" v-model="newReplacerTo"
+                        @keyup.enter="addReplacer">
+                    <button @click="addReplacer">添加</button>
+                </div>
+
+                <div>
+                    <textarea id="import-regex" cols="6" rows="1" placeholder="在此粘贴"
+                        v-model="importRegexGroup"></textarea>
+                    <button @click="importRegex()" style="vertical-align: top">←导入Regex</button>
+
+                    <button @click="exportRegex()" style="vertical-align: top">导出Regex</button>
+                    <button @click="exportReplaceResult()" style="vertical-align: top">复制处理结果</button>
+                </div>
+            </div>
+
+            <ul id="regex-list" v-cloak>
+                <li v-for="regex in regexGroup.regexList" :class="{ dissmiss_regex: regex.dismiss}">
+                    <button @click="removeRegex(regex)">X</button>
+                    <span
+                        :class="{ dissmiss_regex: regex.dismiss, regex_name_text: !regex.dismiss}">{{ regex.name }}</span>
+                    <span
+                        :class="{ dissmiss_regex: regex.dismiss, regex_from_text: !regex.dismiss}">{{ regex.from }}</span>
+                    <span :class="{ dissmiss_regex: regex.dismiss, regex_to_text: !regex.dismiss}">{{ regex.to }}</span>
+                    <button @click="switchDismissRegex(regex)">-</button>
+                </li>
+            </ul>
+        </div>
+        <!-- 先是最简单的功能，之后可以做成类似vilog一样联动渲染，便于看出正则表达式的效果，输入的编辑框可以切换成列表 -->
+        <div id="replace-src-container" class="panel_1">
+            <textarea class="bigInput" id="replace-src" v-model="replaceSrc"></textarea>
+        </div>
+        <div id="replace-result-container" class="panel_1">
+            <textarea class="bigInput" id="replace-result" v-model="replaceResult"
+                @click="exportReplaceResult"></textarea>
+        </div>
+    </div>
+
+    <span id="/replaceman" class="leancloud-visitors" data-flag-title="" style="visibility:hidden">
+        <span class="leancloud-visitors-count"
+            style="color: rgb(94, 20, 41); float: right; padding-right: 10px">0</span>
+    </span>
+    <div id="vcomments" style="display: none"></div>
+
+    <script src='dependency/Valine.min.js'></script>
+    <script src="dependency/vue.js"></script>
+    <script type="module" src="replaceman/script/main.js"></script>
+</body>
+
+</html>
