@@ -32,7 +32,9 @@ let configStorage = {
     fetch: function () {
         let storageJson = localStorage.getItem(this.KEY)
         if (storageJson != null) {
-            return JSON.parse(storageJson)
+            let result = JSON.parse(storageJson)
+            result.enableChangeRegexOrder = false
+            return result
         } else {
             return new Config()
         }
@@ -287,6 +289,28 @@ let app = new Vue({
 
         simpleCopyRegex: function () {
             exportContentToClipboard(this.currentGroup.regexList.map((regex) => regex.regexText).join("|"))
+        },
+
+        changeRegexOrder: function (sortedRegex, index, isUp) {
+            let newIndex = index
+            if (isUp) {
+                newIndex--
+            } else {
+                newIndex++
+            }
+            newIndex = newIndex.between(0, this.currentGroup.regexList.length - 1)
+            if (newIndex == index) return
+
+            this.currentGroup.regexList.splice(index, 1)
+            // if (newIndex > index) {
+            //     this.currentGroup.regexList.splice(newIndex, 0, sortedRegex)
+            // } else if (newIndex < index) {
+            //     this.currentGroup.regexList.splice(newIndex, 0, sortedRegex)
+            // }
+
+            this.currentGroup.regexList.splice(newIndex, 0, sortedRegex.regex)
+
+            this._onChangeRegex()
         },
 
         exportFilterResult: function () {
@@ -616,21 +640,36 @@ function _getFilterLogContainerCenterItemIndex() {
     return Math.min(targetIndex + 5, childSize - 1)
 }
 
-// 把to滚动到视觉中心
+// 把to滚动到视觉中心，如果to在屏幕可视区域内，则不滚动
 function _scrollIndexToCenterInFilterLogContainer(index) {
+    let listElement = filteredLogContainer.childNodes[0].childNodes[index]
+    if (_isEleInScreenVertical(listElement)) return
+
     let windowHeight = window.innerHeight
-    filteredLogContainer.scrollTop = filteredLogContainer.childNodes[0].childNodes[index].offsetTop - windowHeight / 3
+    filteredLogContainer.scrollTop = listElement.offsetTop - windowHeight / 3
 }
 
-// 把to滚动到视觉中心
+// 把to滚动到视觉中心，如果to在屏幕可视区域内，则不滚动
 function _scrollIndexToCenterInLogContainer(index) {
+    let listElement = allLogContainer.childNodes[0].childNodes[index]
+    if (_isEleInScreenVertical(listElement)) return
+
     let windowHeight = window.innerHeight
     let windowWidth = window.innerWidth
     if (windowHeight > windowWidth) {
-        allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - 5 * windowHeight / 6
+        // 竖屏的时候这个view会放下半屏，要做额外处理（这个方法不是很好，耦合太大）
+        allLogContainer.scrollTop = listElement.offsetTop - 5 * windowHeight / 6
     } else {
-        allLogContainer.scrollTop = allLogContainer.childNodes[0].childNodes[index].offsetTop - windowHeight / 3
+        allLogContainer.scrollTop = listElement.offsetTop - windowHeight / 3
     }
+}
+
+function _isEleInScreenVertical(ele) {
+    // 元素在当前屏下面
+    if (ele.getBoundingClientRect().top > window.innerHeight) return false
+    // 元素在当前屏上面
+    if (ele.getBoundingClientRect().bottom < 0) return false
+    return true
 }
 
 function isStringEmpty(obj) {

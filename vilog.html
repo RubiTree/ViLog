@@ -188,8 +188,15 @@
             word-wrap: break-word;
         }
 
-        .dissmiss_regex {
-            color: rgb(211, 209, 209)
+        /* 并集选择，加上类的后代选择 */
+        .dissmiss_regex,
+        .dissmiss_regex .regex_counter {
+            color: rgb(211, 209, 209) !important
+        }
+
+        .regex_counter {
+            color: #1D6E94;
+            float: right;
         }
 
         li:hover {
@@ -242,7 +249,12 @@
             align-self: center;
             background: white;
             margin: 0px;
-            padding: 0px
+            padding: 0px;
+            opacity: 0.3;
+        }
+
+        .circle_button:hover {
+            opacity: 1;
         }
 
         .log_tips_line {
@@ -275,6 +287,7 @@
             float: right;
             opacity: 0.3;
         }
+
         .log_tips_switch:hover {
             opacity: 1;
         }
@@ -332,6 +345,11 @@
                                 style="background-color:  rgb(158, 42, 75);border:none">删除所有组</button>
                         </div>
 
+                        <div style="margin-top: 5px">
+                            <input type="checkbox" id="enableChangeRegexOrder"
+                                v-model="config.enableChangeRegexOrder"><label for="enableChangeRegexOrder">排序</label>
+                        </div>
+
                     </div>
 
                     <div id="group-panel">
@@ -350,11 +368,15 @@
                         :class="{ dissmiss_regex: sortedRegex.regex.dismiss , hover_item: sortedRegex.hover, foucus_item: sortedRegex.focus, regex_container_c2: index % 2 != 0}"
                         @mouseenter="onMouseEnterRegex(sortedRegex)" @mouseleave="onMouseLeaveRegex(sortedRegex)">
                         <button @click.stop="removeRegex(sortedRegex)" class="circle_button">X</button>
+                        <button v-if="config.enableChangeRegexOrder"
+                            @click.stop="changeRegexOrder(sortedRegex, index, true)" class="circle_button">∧</button>
+                        <button v-if="config.enableChangeRegexOrder"
+                            @click.stop="changeRegexOrder(sortedRegex, index, false)" class="circle_button">∨</button>
                         <span>{{sortedRegex.regex.regexText}}</span>
 
                         <button @click.stop="switchDismissRegex(sortedRegex)" class="circle_button"
                             style="float: right">-</button>
-                        <font color="#1D6E94" style="float: right">{{ sortedRegex.getFocusProgress() }}</font>
+                        <span class="regex_counter">{{ sortedRegex.getFocusProgress() }}</span>
                     </li>
                 </ul>
             </div>
