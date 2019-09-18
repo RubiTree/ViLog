@@ -577,6 +577,11 @@ function processBaseLineByInternel(baseLine) {
         baseLine.isError = true
     }
 
+    // temp
+    if (baseLine.content.search(/\w{5} \w{4}, \w{13}e:0/) > -1) {
+        baseLine.isError = true
+    }
+
     let contentIndex = baseLine.content.search(/(?<=(\[.*\]){4,7}).*/)
     if (contentIndex > -1) {
         baseLine.contentStartIndex = contentIndex
